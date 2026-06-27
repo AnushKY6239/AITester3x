@@ -1,0 +1,199 @@
+﻿output
+"```json
+[
+  {
+    ""testCaseId"": ""TC-EXP-001"",
+    ""module"": ""Experimentation and Testing"",
+    ""title"": ""A/B Testing with Two Variations"",
+    ""preconditions"": ""User is logged in and has permission to create experiments"",
+    ""testSteps"": [
+      ""Create a new A/B test with two variations"",
+      ""Define the audience segment parameters"",
+      ""Configure the test variations using the visual editor"",
+      ""Launch the test and monitor progress""
+    ],
+    ""testData"": {
+      ""variation1"": ""Control group"",
+      ""variation2"": ""Treatment group"",
+      ""audienceSegment"": ""Users from the United States""
+    },
+    ""expectedResult"": ""The test is created and launched successfully, and the results are displayed in the dashboard"",
+    ""priority"": ""High"",
+    ""severity"": ""Critical"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-EXP-002"",
+    ""module"": ""Experimentation and Testing"",
+    ""title"": ""Split URL Testing with Three Variations"",
+    ""preconditions"": ""User is logged in and has permission to create experiments"",
+    ""testSteps"": [
+      ""Create a new split URL test with three variations"",
+      ""Define the audience segment parameters"",
+      ""Configure the test variations using the code editor"",
+      ""Launch the test and monitor progress""
+    ],
+    ""testData"": {
+      ""variation1"": ""Control group"",
+      ""variation2"": ""Treatment group 1"",
+      ""variation3"": ""Treatment group 2"",
+      ""audienceSegment"": ""Users from the United Kingdom""
+    },
+    ""expectedResult"": ""The test is created and launched successfully, and the results are displayed in the dashboard"",
+    ""priority"": ""High"",
+    ""severity"": ""Critical"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-BEH-001"",
+    ""module"": ""Behavioral Insights"",
+    ""title"": ""Heatmap Generation for a Specific Page"",
+    ""preconditions"": ""User is logged in and has permission to access behavioral insights"",
+    ""testSteps"": [
+      ""Access the VWO Insights dashboard"",
+      ""Generate a heatmap for a specific page"",
+      ""Verify that the heatmap is displayed correctly""
+    ],
+    ""testData"": {
+      ""page"": ""/home"",
+      ""heatmapType"": ""Click heatmap""
+    },
+    ""expectedResult"": ""The heatmap is generated and displayed correctly for the specified page"",
+    ""priority"": ""Medium"",
+    ""severity"": ""Major"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-BEH-002"",
+    ""module"": ""Behavioral Insights"",
+    ""title"": ""Session Recording for a Specific User"",
+    ""preconditions"": ""User is logged in and has permission to access behavioral insights"",
+    ""testSteps"": [
+      ""Access the VWO Insights dashboard"",
+      ""Generate a session recording for a specific user"",
+      ""Verify that the session recording is displayed correctly""
+    ],
+    ""testData"": {
+      ""userId"": ""12345"",
+      ""sessionRecordingType"": ""Mouse movement""
+    },
+    ""expectedResult"": ""The session recording is generated and displayed correctly for the specified user"",
+    ""priority"": ""Medium"",
+    ""severity"": ""Major"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-PER-001"",
+    ""module"": ""Personalization"",
+    ""title"": ""Segmenting Users by Geography"",
+    ""preconditions"": ""User is logged in and has permission to access personalization"",
+    ""testSteps"": [
+      ""Access the VWO Personalize dashboard"",
+      ""Create a new segment based on geography"",
+      ""Verify that the segment is created correctly""
+    ],
+    ""testData"": {
+      ""segmentName"": ""US Users"",
+      ""geography"": ""United States""
+    },
+    ""expectedResult"": ""The segment is created correctly and users are segmented by geography"",
+    ""priority"": ""High"",
+    ""severity"": ""Critical"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-PER-002"",
+    ""module"": ""Personalization"",
+    ""title"": ""Delivering Customized Content in Real-Time"",
+    ""preconditions"": ""User is logged in and has permission to access personalization"",
+    ""testSteps"": [
+      ""Access the VWO Personalize dashboard"",
+      ""Create a new campaign with customized content"",
+      ""Verify that the content is delivered in real-time""
+    ],
+    ""testData"": {
+      ""campaignName"": ""Summer Sale"",
+      ""content"": ""Summer sale banner""
+    },
+    ""expectedResult"": ""The customized content is delivered in real-time to the targeted users"",
+    ""priority"": ""High"",
+    ""severity"": ""Critical"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-INT-001"",
+    ""module"": ""Integrations"",
+    ""title"": ""Integration with Google Analytics"",
+    ""preconditions"": ""User is logged in and has permission to access integrations"",
+    ""testSteps"": [
+      ""Access the VWO Integrations dashboard"",
+      ""Configure the Google Analytics integration"",
+      ""Verify that the integration is successful""
+    ],
+    ""testData"": {
+      ""integrationName"": ""Google Analytics"",
+      ""apiKey"": ""1234567890""
+    },
+    ""expectedResult"": ""The integration with Google Analytics is successful and data is synced correctly"",
+    ""priority"": ""Medium"",
+    ""severity"": ""Major"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-INT-002"",
+    ""module"": ""Integrations"",
+    ""title"": ""Integration with Salesforce"",
+    ""preconditions"": ""User is logged in and has permission to access integrations"",
+    ""testSteps"": [
+      ""Access the VWO Integrations dashboard"",
+      ""Configure the Salesforce integration"",
+      ""Verify that the integration is successful""
+    ],
+    ""testData"": {
+      ""integrationName"": ""Salesforce"",
+      ""apiKey"": ""1234567890""
+    },
+    ""expectedResult"": ""The integration with Salesforce is successful and data is synced correctly"",
+    ""priority"": ""Medium"",
+    ""severity"": ""Major"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-SEC-001"",
+    ""module"": ""Security"",
+    ""title"": ""Two-Factor Authentication"",
+    ""preconditions"": ""User is logged in and has permission to access security settings"",
+    ""testSteps"": [
+      ""Access the VWO Security dashboard"",
+      ""Enable two-factor authentication"",
+      ""Verify that two-factor authentication is successful""
+    ],
+    ""testData"": {
+      ""authenticationMethod"": ""SMS""
+    },
+    ""expectedResult"": ""Two-factor authentication is enabled and successful"",
+    ""priority"": ""High"",
+    ""severity"": ""Critical"",
+    ""type"": ""Positive""
+  },
+  {
+    ""testCaseId"": ""TC-SEC-002"",
+    ""module"": ""Security"",
+    ""title"": ""Role-Based Access Control"",
+    ""preconditions"": ""User is logged in and has permission to access security settings"",
+    ""testSteps"": [
+      ""Access the VWO Security dashboard"",
+      ""Create a new role with specific permissions"",
+      ""Verify that the role is created correctly""
+    ],
+    ""testData"": {
+      ""roleName"": ""Admin"",
+      ""permissions"": ""Create, Edit, Delete""
+    },
+    ""expectedResult"": ""The role is created correctly and permissions are applied successfully"",
+    ""priority"": ""High"",
+    ""severity"": ""Critical"",
+    ""type"": ""Positive""
+  }
+]
+```"

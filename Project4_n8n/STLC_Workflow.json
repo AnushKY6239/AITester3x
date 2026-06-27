@@ -1,0 +1,369 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Accept PRD PDF",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload PRD Doc",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9f2930c6-cace-4786-ad2f-a7fbfab8102f",
+      "name": "On form submission",
+      "webhookId": "93d93264-f05c-4580-8977-85493acbdf8f"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Upload_PRD_Doc",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "659fe597-b2d9-42ea-ab74-40ca26418138",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "6c7eeda8-6cc7-4df7-9639-d99a1a37ef59",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "7W1Iu8LON8S2Bf1U",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {
+          "fileName": "=test-plan-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.md"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "6a217eb4-2a4a-4fc7-82e8-b12c3a0a1a3e",
+      "name": "Convert to md File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Senior QA Engineer.\n\nUsing the requirement document and test plan, generate comprehensive test cases.\n\nFor each test case include:\n- Test Case ID\n- Module\n- Title\n- Preconditions\n- Test Steps\n- Test Data\n- Expected Result\n- Priority\n- Severity\n- Type (Positive/Negative)\n\nRequirement:\n{{ $(\"Extract from File\").item.json.text }}\n\nTest Plan:\n{{ $(\"Generate Test Plan\").item.json.output }}\n\nReturn the test cases as a JSON array where each object represents one test case with the fields: testCaseId, module, title, preconditions, testSteps, testData, expectedResult, priority, severity, type",
+        "options": {
+          "systemMessage": "You are a Senior QA Engineer specialized in creating comprehensive test cases. Generate detailed test cases based on requirements and test plans. Return ONLY a valid JSON array of test case objects.",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        896,
+        192
+      ],
+      "id": "1fb2bea0-0723-4ee3-b667-bbe061c476d6",
+      "name": "Generate TestCase Bot",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Senior QA Test Architect.\n\nAnalyze the requirement document and create a complete Test Plan.\n\nInclude:\n- Scope\n- Objectives\n- Assumptions\n- Risks\n- Test Strategy\n- Functional Testing\n- Non-Functional Testing\n- Test Environment\n- Entry Criteria\n- Exit Criteria\n- Deliverables\n- Test Schedule\n- Resource Requirements\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "acbe583b-25d0-43a2-8113-18a608ad0da9",
+      "name": "Generate Test Plan"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Rate limit reached. Please wait 30-60 seconds and try again. The test plan has been saved successfully."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        192
+      ],
+      "id": "ae3c5512-cc8c-4a03-a6c9-889f7b87a314",
+      "name": "Handle Rate Limit Error"
+    },
+    {
+      "parameters": {
+        "options": {
+          "fileName": "=test-cases-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.csv",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "2af518bd-44ff-4160-8066-694fe0a372f2",
+      "name": "Convert to CSV File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Senior Automation Engineer.\n\nConvert the provided test cases into Playwright JAVA test scripts.\n\nRequirements:\n- Use JAVA and Playwright\n- Use best practices\n- Create meaningful test names\n- Add comments\n- Use reusable locators\n- Include assertions\n- Generate executable JAVA code\n\nTest Cases:\n{{ $(\"Generate TestCase Bot\").item.json.output }}\n\nReturn ONLY the JAVA code without any markdown formatting or code blocks.",
+        "options": {
+          "systemMessage": "You are a Senior Automation Engineer specialized in creating JAVA Playwright test scripts. Generate clean, executable JAVA code based on test cases. Return ONLY the JAVA code without markdown formatting.",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1680,
+        0
+      ],
+      "id": "d8537f30-1123-42bc-a9ca-269c637cd9da",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Rate limit reached. Please wait 30-60 seconds and try again. The test cases have been saved successfully."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        272
+      ],
+      "id": "f60045fb-58a4-4f3e-a33a-97853decb3ab",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {
+          "fileName": "=playwright-tests-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.md"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2032,
+        -96
+      ],
+      "id": "7e1e68dc-ae8f-4176-aec6-9e5a581a0249",
+      "name": "Generate playwright scripts in .md file"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Change 5000 to your desired wait time in milliseconds\nconst delayTime = 60000; \n\nawait new Promise(resolve => setTimeout(resolve, delayTime));\n\n// Pass the incoming data through completely untouched\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        208
+      ],
+      "id": "23a88b70-a8c8-454e-9f11-1870078e1136",
+      "name": "Wait Before Testcase"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Change 5000 to your desired wait time in milliseconds\nconst delayTime = 60000; \n\nawait new Promise(resolve => setTimeout(resolve, delayTime));\n\n// Pass the incoming data through completely untouched\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        0
+      ],
+      "id": "fe2b8d23-f5d1-4c11-9eb0-123bba904cb3",
+      "name": "Wait before playwright"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Generate Test Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Test Plan",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate TestCase Bot",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to md File": {
+      "main": [
+        []
+      ]
+    },
+    "Generate Test Plan": {
+      "main": [
+        [
+          {
+            "node": "Convert to md File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait Before Testcase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate TestCase Bot": {
+      "main": [
+        [
+          {
+            "node": "Convert to CSV File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Rate Limit Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to CSV File": {
+      "main": [
+        [
+          {
+            "node": "Wait before playwright",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate playwright scripts in .md file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Testcase": {
+      "main": [
+        [
+          {
+            "node": "Generate TestCase Bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait before playwright": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "01ec04f9-a571-4555-8b6c-5f93d071bad2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2e89ba1821474c41fda89d56df29269b6a9296c2e55699c3b821cca3d6a7f311"
+  },
+  "nodeGroups": [],
+  "id": "d9StQQmeFbtI5zNg",
+  "tags": []
+}

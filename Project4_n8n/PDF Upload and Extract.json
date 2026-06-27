@@ -1,0 +1,460 @@
+{
+  "name": "PDF Upload and Extract",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "PDF Upload",
+        "formDescription": "Upload a PDF document to extract its text content",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "PDF Document",
+              "fieldType": "file",
+              "fieldName": "pdfFile",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1a1df0ea-4591-4e3f-ae34-a78375cba17d",
+      "name": "Upload PDF Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        400
+      ],
+      "webhookId": "9004a38c-33a5-4176-a015-5f75ea729268"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "pdfFile",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "id": "b854a04b-a52b-48b2-bfbf-c31e762765e6",
+      "name": "Extract PDF Content",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Senior QA Test Architect.\n\nAnalyze the following requirement document and create a complete Test Plan.\n\nInclude:\n- Scope\n- Objectives\n- Assumptions\n- Risks\n- Test Strategy\n- Functional Testing\n- Non-Functional Testing\n- Test Environment\n- Entry Criteria\n- Exit Criteria\n- Deliverables\n- Test Schedule\n- Resource Requirements\n\nDocument:\n{{ $json.text }}\n\nOutput structured markdown.",
+        "options": {
+          "systemMessage": "You are a Senior QA Test Architect specialized in creating comprehensive test plans. Generate detailed, structured markdown documentation.",
+          "maxIterations": 10
+        }
+      },
+      "id": "e42cb84a-50ca-4c41-894a-bb819c4093d3",
+      "name": "Generate Test Plan",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 8000,
+          "temperature": 0.7
+        }
+      },
+      "id": "4d7acbbf-6377-4388-9612-385a4e154d77",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        768,
+        624
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "wE5qvOgIYrkwF6rt",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {
+          "fileName": "=test-plan-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.md"
+        }
+      },
+      "id": "0cee24aa-8615-4d22-9683-7ed49ee2eaf2",
+      "name": "Convert to Markdown File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=test-plan-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.md",
+        "options": {}
+      },
+      "id": "2e71a375-501a-456c-8fd1-f7468e1721c5",
+      "name": "Save Markdown File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1328,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Senior QA Engineer.\n\nUsing the requirement document and test plan, generate comprehensive test cases.\n\nFor each test case include:\n- Test Case ID\n- Module\n- Title\n- Preconditions\n- Test Steps\n- Test Data\n- Expected Result\n- Priority\n- Severity\n- Type (Positive/Negative)\n\nRequirement:\n{{ $(\"Extract PDF Content\").item.json.text }}\n\nTest Plan:\n{{ $(\"Generate Test Plan\").item.json.output }}\n\nReturn the test cases as a JSON array where each object represents one test case with the fields: testCaseId, module, title, preconditions, testSteps, testData, expectedResult, priority, severity, type",
+        "options": {
+          "systemMessage": "You are a Senior QA Engineer specialized in creating comprehensive test cases. Generate detailed test cases based on requirements and test plans. Return ONLY a valid JSON array of test case objects.",
+          "maxIterations": 10
+        }
+      },
+      "id": "42d1b886-f02a-4527-bfee-4d96989bdf05",
+      "name": "Generate Test Cases",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1264,
+        496
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "fileName": "=test-cases-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.csv",
+          "headerRow": true
+        }
+      },
+      "id": "702dd8ae-51f3-4b99-9483-d245d406510e",
+      "name": "Convert to CSV File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1616,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=test-cases-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.csv",
+        "options": {}
+      },
+      "id": "223f22ce-094a-4024-8c56-1d29a7e2aa3b",
+      "name": "Save CSV File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1840,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "id": "4573920d-1980-4863-a443-f1c9a46789ae",
+      "name": "Wait Before Test Cases",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        496
+      ],
+      "webhookId": "cb143d0a-7fe7-4817-9bb9-469edc51a797"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Rate limit reached. Please wait 30-60 seconds and try again. The test plan has been saved successfully."
+      },
+      "id": "9fcb22d2-627a-4d92-a03f-3c90b4bd7ced",
+      "name": "Handle Rate Limit Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "id": "3d1094a9-4530-4761-a503-a046122d5e64",
+      "name": "Wait Before Playwright",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2064,
+        400
+      ],
+      "webhookId": "57e62d01-26e4-4408-b974-b2993ad57c78"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Senior Automation Engineer.\n\nConvert the provided test cases into Playwright JAVA test scripts.\n\nRequirements:\n- Use JAVA and Playwright\n- Use best practices\n- Create meaningful test names\n- Add comments\n- Use reusable locators\n- Include assertions\n- Generate executable JAVA code\n\nTest Cases:\n{{ $(\"Generate Test Cases\").item.json.output }}\n\nReturn ONLY the JAVA code without any markdown formatting or code blocks.",
+        "options": {
+          "systemMessage": "You are a Senior Automation Engineer specialized in creating JAVA Playwright test scripts. Generate clean, executable JAVA code based on test cases. Return ONLY the JAVA code without markdown formatting.",
+          "maxIterations": 10
+        }
+      },
+      "id": "ea3218ef-8318-489b-98e8-ce58155317b4",
+      "name": "Generate Playwright Tests",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2288,
+        400
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {
+          "fileName": "=playwright-tests-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.md"
+        }
+      },
+      "id": "161d712e-8475-47f6-b6cb-1cd0712f4602",
+      "name": "Convert to Java File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2640,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=playwright-tests-{{ $now.toFormat(\"yyyy-MM-dd-HHmmss\") }}.md",
+        "options": {}
+      },
+      "id": "e4d397bf-429d-46e1-8bf0-b39aa5ace4ef",
+      "name": "Save Java File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        2864,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Rate limit reached. Please wait 30-60 seconds and try again. The test cases have been saved successfully."
+      },
+      "id": "31cc42a5-21e3-4ca7-a492-a66c4f9d37e9",
+      "name": "Handle Playwright Rate Limit",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        496
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Upload PDF Form": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Content": {
+      "main": [
+        [
+          {
+            "node": "Generate Test Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Test Plan",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Test Cases",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Playwright Tests",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Test Plan": {
+      "main": [
+        [
+          {
+            "node": "Convert to Markdown File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait Before Test Cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Markdown File": {
+      "main": [
+        [
+          {
+            "node": "Save Markdown File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Markdown File": {
+      "main": [
+        []
+      ]
+    },
+    "Generate Test Cases": {
+      "main": [
+        [
+          {
+            "node": "Convert to CSV File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Rate Limit Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to CSV File": {
+      "main": [
+        [
+          {
+            "node": "Save CSV File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Test Cases": {
+      "main": [
+        [
+          {
+            "node": "Generate Test Cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save CSV File": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Playwright",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Playwright": {
+      "main": [
+        [
+          {
+            "node": "Generate Playwright Tests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Playwright Tests": {
+      "main": [
+        [
+          {
+            "node": "Convert to Java File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Playwright Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Java File": {
+      "main": [
+        [
+          {
+            "node": "Save Java File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4f9388ea-042d-4234-843f-39a4f552be57",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0d943ad949bf8077eb03d518015b0a868c06c77e591357430f0330e68fba877a"
+  },
+  "nodeGroups": [],
+  "id": "3XWdmAPyEaaNZoI4",
+  "tags": []
+}

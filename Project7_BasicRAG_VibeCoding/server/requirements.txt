@@ -1,0 +1,6 @@
+flask>=3.0
+flask-cors>=6.0
+chromadb>=1.0
+pypdf>=4.0
+groq>=0.30
+requests>=2.31
